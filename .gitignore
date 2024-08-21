@@ -1,7 +1,8 @@
 .idea/
 rmm_log.txt
 catboost_info/
-
+s3-bucket/
+creds
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
