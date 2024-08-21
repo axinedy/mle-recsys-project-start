@@ -1,3 +1,10 @@
+Репозиторий: https://github.com/axinedy/mle-recsys-project-start
+
+S3 bucket: s3-student-mle-20240325-3ac233b55a
+
+<br><br><br><br><br><br><br><br><br>
+
+
 
 
 

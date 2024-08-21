@@ -1,4 +1,6 @@
 .idea/
+rmm_log.txt
+catboost_info/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
