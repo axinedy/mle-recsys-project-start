@@ -5,7 +5,6 @@ import requests
 
 
 service_url = 'http://{}:{}'
-
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
 
@@ -39,6 +38,15 @@ def get_recs(user_id: int, k: int):
     print(resp.json())
 
 
+def post_event(user_id: int, item_id: int):
+    resp = requests.post(
+        service_url + "/store_event", headers=headers, params={'user_id': user_id, "item_id": item_id})
+    if resp.status_code != 200:
+        print(f"status code: {resp.status_code}")
+    print(resp.json())
+
+
+
 if __name__ == '__main__':
     options = get_options()
     service_url = service_url.format(options.ip, options.port)
@@ -50,5 +58,4 @@ if __name__ == '__main__':
         user_id = options.user
     print(options, user_id)
 
-    get_recs(user_id, options.count)
-
+    post_event(user_id, options.track) if options.track else get_recs(user_id, options.count)

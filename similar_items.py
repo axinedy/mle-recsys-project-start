@@ -18,12 +18,12 @@ class SimilarItems:
 
     def get(self, item_id: int, k: int = 10):
         try:
-            i2i = self._similar_items.loc[item_id].head(k)
+            log.info(f"SimilarItems.get {item_id}, {k}")
+            i2i = self._similar_items.loc[item_id].sample(k).track_id_2.values.tolist()
             print(i2i)
-            i2i = i2i[["item_id_2", "score"]].to_dict()
         except KeyError:
-            log.error(f"No similar items found for {item_id}")
-            i2i = {"item_id_2": [], "score": {}}
+            log.warning(f"No similar items found for {item_id}")
+            i2i = []
 
         return i2i
 

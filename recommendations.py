@@ -21,12 +21,13 @@ class Recommendations:
             self._recs[type] = self._recs[type].set_index("user_id")
         log.info(f"Loaded: {type}")
 
-    def get(self, user_id: int, k: int = 100):
-        print(user_id, k)
+    def get(self, user_id: int, k: int = 10):
+        log.info(f"Recommendations.get {user_id}, {k}")
         try:
             recs = self._recs["personal"].loc[user_id]
             log.info(f'Found personal recommendations for user {user_id}')
             recs = recs.sample(k)["item_id"].to_list()
+            print(recs)
             self._stats["request_personal_count"] += 1
         except KeyError:
             recs = self._recs["default"]
