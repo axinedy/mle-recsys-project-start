@@ -1,11 +1,13 @@
-import logging as logger
+import logging
 import pandas as pd
+
+
+log = logging.getLogger("uvicorn.error")
 
 
 class Recommendations:
 
     def __init__(self):
-
         self._recs = {"personal": None, "default": None}
         self._stats = {
             "request_personal_count": 0,
@@ -13,31 +15,31 @@ class Recommendations:
         }
 
     def load(self, type, path, **kwargs):
-        logger.info(f"Loading recommendations, type: {type} ({path})")
+        log.info(f"Loading recommendations, type: {type} ({path})")
         self._recs[type] = pd.read_parquet(path, **kwargs)
         if type == "personal":
             self._recs[type] = self._recs[type].set_index("user_id")
-        logger.info(f"Loaded")
+        log.info(f"Loaded: {type}")
 
     def get(self, user_id: int, k: int = 100):
         print(user_id, k)
         try:
             recs = self._recs["personal"].loc[user_id]
-            print(recs)
+            log.info(f'Found personal recommendations for user {user_id}')
             recs = recs.sample(k)["item_id"].to_list()
             self._stats["request_personal_count"] += 1
         except KeyError:
             recs = self._recs["default"]
+            log.info(f'Recommendations for user {user_id} not found, returning default')
             recs = recs.sample(k)["track_id"].to_list()
             self._stats["request_default_count"] += 1
         except Exception as e:
             print(f'{type(e)}: {e}')
-            logger.error("No recommendations found")
+            log.error("No recommendations found")
             recs = []
-
         return recs
 
     def stats(self):
-        logger.info("Stats for recommendations")
+        log.info("Stats for recommendations")
         for name, value in self._stats.items():
-            logger.info(f"{name:<30} {value} ")
+            log.info(f"{name:} {value} ")

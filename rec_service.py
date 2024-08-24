@@ -1,14 +1,13 @@
 import logging
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from recommendations import Recommendations
-import requests
+from similar_items import SimilarItems
 
 
 features_store_url = "http://127.0.0.1:8010"
 events_store_url = "http://127.0.0.1:8020"
 
-logger = logging.getLogger("uvicorn.error")
+log = logging.getLogger("uvicorn.error")
 
 rec_store = Recommendations()
 rec_store.load(
@@ -22,20 +21,24 @@ rec_store.load(
     columns=["track_id", "users", ],
 )
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print(app.title)
-    logger.info("Starting")
-
-    yield
-    logger.info("Stopping")
+sim_store = SimilarItems()
+sim_store.load(
+    "similar.parquet",
+    columns=["score", "track_id_1", "track_id_2"]
+)
 
 
-app = FastAPI(title="recommendations", lifespan=lifespan)
+app = FastAPI(title="Сервис рекомендаций")
 
 
-@app.post("/recommendations")
+
+@app.get(
+    "/recommendations",
+    summary="Получение", tags=["Рекомендации"],
+    description="""
+        Возвращает персональные рекомендации для пользователя, при их наличии, иначе рекомендации по умолчанию.
+        Если имеется онлайн-история, то, к полученным выше описанным способом рекомендациям, подмешиваются похожие трэки. 
+        """)
 async def recommendations(user_id: int, k: int = 10):
     recs = rec_store.get(user_id, k)
     return {"recs": recs}
