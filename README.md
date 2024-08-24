@@ -1,26 +1,21 @@
+# Система рекомендаций
+
 Репозиторий: https://github.com/axinedy/mle-recsys-project-start
 
-S3 bucket: s3-student-mle-20240325-3ac233b55a
+S3 bucket: s3-student-mle-20240325-3ac233b55a (https://storage.yandexcloud.net)
 
-<br><br><br><br><br><br><br><br><br>
-
-
-
-
-
-# Подготовка виртуальной машины
+<br>
 
 ## Склонируйте репозиторий
 
 Склонируйте репозиторий проекта:
 
 ```
-git clone https://github.com/yandex-praktikum/mle-project-sprint-4-v001.git
+git clone https://github.com/axinedy/mle-recsys-project-start
+cd mle-recsys-project-start
 ```
 
 ## Активируйте виртуальное окружение
-
-Используйте то же самое виртуальное окружение, что и созданное для работы с уроками. Если его не существует, то его следует создать.
 
 Создать новое виртуальное окружение можно командой:
 
@@ -31,7 +26,8 @@ python3 -m venv env_recsys_start
 После его инициализации следующей командой
 
 ```
-. env_recsys_start/bin/activate
+chmod +x ./env_recsys_start/bin/activate
+./env_recsys_start/bin/activate
 ```
 
 установите в него необходимые Python-пакеты следующей командой
@@ -42,21 +38,20 @@ pip install -r requirements.txt
 
 ### Скачайте файлы с данными
 
-Для начала работы понадобится три файла с данными:
-- [tracks.parquet](https://storage.yandexcloud.net/mle-data/ym/tracks.parquet)
-- [catalog_names.parquet](https://storage.yandexcloud.net/mle-data/ym/catalog_names.parquet)
-- [interactions.parquet](https://storage.yandexcloud.net/mle-data/ym/interactions.parquet)
+Для начала работы понадобится три файла с данными (из S3 bucket):
+```
+recommendations.parquet
+similar.parquet
+top_popular.parquet
+```
  
-Скачайте их в директорию локального репозитория. Для удобства вы можете воспользоваться командой wget:
+Скачайте их в директорию локального репозитория. 
+Для удобства вы можете примонтировать и скопировать следующей командой:
 
 ```
-wget https://storage.yandexcloud.net/mle-data/ym/tracks.parquet
-
-wget https://storage.yandexcloud.net/mle-data/ym/catalog_names.parquet
-
-wget https://storage.yandexcloud.net/mle-data/ym/interactions.parquet
+./load_data_from_s3.sh 
 ```
-
+<!---
 ## Запустите Jupyter Lab
 
 Запустите Jupyter Lab в командной строке
@@ -68,15 +63,27 @@ jupyter lab --ip=0.0.0.0 --no-browser
 # Расчёт рекомендаций
 
 Код для выполнения первой части проекта находится в файле `recommendations.ipynb`. Изначально, это шаблон. Используйте его для выполнения первой части проекта.
-
+-->
 # Сервис рекомендаций
 
 Код сервиса рекомендаций находится в файле `recommendations_service.py`.
 
-<*укажите здесь необходимые шаги для запуска сервиса рекомендаций*>
+Запустить можно командой:
+```
+./rec_service.sh
+```
 
 # Инструкции для тестирования сервиса
 
 Код для тестирования сервиса находится в файле `test_service.py`.
 
-<*укажите здесь необходимые шаги для тестирования сервиса рекомендаций*>
+Запустить пачку тестов можно командой:
+
+```
+./batch_test_service.sh
+```
+
+Ознакомиться с опциями:
+```
+./test_service.py
+```

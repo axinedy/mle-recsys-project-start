@@ -172,3 +172,4 @@ cython_debug/
 
 # project environment
 env_recsys_start/
+.passwd-s3fs
