@@ -1,5 +1,4 @@
 import random
-import itertools
 import logging
 from urllib.request import Request
 from fastapi import FastAPI
@@ -47,29 +46,21 @@ async def range_error_exception_handler(request: Request, exc: RangeError):
         content={"message": str(exc)},)
 
 
-def deduplicate(lst: list) -> list:
-    return list(set(lst))
-
-
 def get_sims(user_id: int, max_events: int) -> list[int]:
     hist = events_store.get(user_id, max_events)
     log.info(f'History: {hist}')
     sims = [sim_store.get(h, max_events) for h in hist]
-    # print(sims)
+    # print('all sims', sims)
     n = 0
     rs = []
     for s in sims:
         if len(s):
             rs.append(s)
             n += 1
-    print('rs', rs, n)
     sims = []
     max_sim = max(max_events // max(n, 1), 1)
-    print(max_sim)
     for s in rs:
-        print('s', s)
         sims += random.sample(s, max_sim)
-    print(sims)
     return sims
 
 
@@ -84,13 +75,11 @@ def recommendations(user_id: int, k: int = 10):
     if k > MAX_K or k <= 0:
         raise RangeError("k is out of range")
     sims = get_sims(user_id, k // 2 | 1)
-    print('Sims', sims)
     recs = rec_store.get(user_id, k)
-    print('Recs', recs)
-    # n = min(len(sims), len(recs))
-    # result = list(itertools.chain(*[[a, b] for a, b in zip(recs, sims)]))
-    result = random.sample(deduplicate(sims + recs), k)
-    print(result)
+    # print('Sims', sims)
+    # print('Recs', recs)
+    result = random.sample(set(sims + recs), k)
+    # print(result)
     return {"recs": result}
 
 

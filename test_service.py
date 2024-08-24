@@ -41,10 +41,9 @@ def get_recs(user_id: int, k: int):
 def post_event(user_id: int, item_id: int):
     resp = requests.post(
         service_url + "/store_event", headers=headers, params={'user_id': user_id, "item_id": item_id})
-    if resp.status_code != 200:
+    if resp.status_code not in [200, 201]:
         print(f"status code: {resp.status_code}")
     print(resp.json())
-
 
 
 if __name__ == '__main__':
@@ -56,6 +55,5 @@ if __name__ == '__main__':
         user_id = 778110
     else:
         user_id = options.user
-    print(options, user_id)
-
+    # print(options, user_id)
     post_event(user_id, options.track) if options.track else get_recs(user_id, options.count)
