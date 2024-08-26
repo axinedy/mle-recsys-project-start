@@ -8,6 +8,10 @@ from recommendations import Recommendations
 from similar_items import SimilarItems
 
 
+rec_columns = ["user_id", "item_id", "score", "tracks_total", "hearing_days", "tracks_per_day", "nusers", "rank"]
+def_columms = ["track_id", "users", ]
+sim_columns = ["score", "track_id_1", "track_id_2"]
+
 MAX_K = 100
 log = logging.getLogger("uvicorn.error")
 
@@ -15,18 +19,18 @@ rec_store = Recommendations()
 rec_store.load(
     "personal",
     'recommendations.parquet',
-    columns=["user_id", "item_id", "score", "tracks_total", "hearing_days", "tracks_per_day", "nusers", "rank"],
+    columns=rec_columns,
 )
 rec_store.load(
     "default",
     'top_popular.parquet',
-    columns=["track_id", "users", ],
+    columns=def_columms,
 )
 
 sim_store = SimilarItems()
 sim_store.load(
     "similar.parquet",
-    columns=["score", "track_id_1", "track_id_2"]
+    columns=sim_columns
 )
 
 events_store = EventStore()
@@ -49,19 +53,19 @@ async def range_error_exception_handler(request: Request, exc: RangeError):
 def get_sims(user_id: int, max_events: int) -> list[int]:
     hist = events_store.get(user_id, max_events)
     log.info(f'History: {hist}')
-    sims = [sim_store.get(h, max_events) for h in hist]
+    similars = [sim_store.get(h, max_events) for h in hist]
     # print('all sims', sims)
-    n = 0
+    non_empty_count = 0
     rs = []
-    for s in sims:
-        if len(s):
-            rs.append(s)
-            n += 1
-    sims = []
-    max_sim = max(max_events // max(n, 1), 1)
-    for s in rs:
-        sims += random.sample(s, max_sim)
-    return sims
+    for si in similars:
+        if len(si):
+            rs.append(si)
+            non_empty_count += 1
+    similars = []
+    max_sim = max(max_events // max(non_empty_count, 1), 1)
+    for si in rs:
+        similars += random.sample(si, max_sim)
+    return similars
 
 
 @app.get(
@@ -73,7 +77,7 @@ def get_sims(user_id: int, max_events: int) -> list[int]:
         """)
 def recommendations(user_id: int, k: int = 10):
     if k > MAX_K or k <= 0:
-        raise RangeError("k is out of range")
+        raise RangeError("k is out of range, allowed values [1..100]")
     sims = get_sims(user_id, k // 2 | 1)
     recs = rec_store.get(user_id, k)
     # print('Sims', sims)

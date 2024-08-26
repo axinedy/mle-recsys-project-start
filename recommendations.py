@@ -24,16 +24,17 @@ class Recommendations:
     def get(self, user_id: int, k: int = 10):
         log.info(f"Recommendations.get {user_id}, {k}")
         try:
-            recs = self._recs["personal"].loc[user_id]
-            log.info(f'Found personal recommendations for user {user_id}')
-            recs = recs.sample(k)["item_id"].to_list()
-            print(recs)
-            self._stats["request_personal_count"] += 1
-        except KeyError:
-            recs = self._recs["default"]
-            log.info(f'Recommendations for user {user_id} not found, returning default')
-            recs = recs.sample(k)["track_id"].to_list()
-            self._stats["request_default_count"] += 1
+            if user_id in self._recs["personal"]:
+                recs = self._recs["personal"].loc[user_id]
+                log.info(f'Found personal recommendations for user {user_id}')
+                recs = recs.sample(k)["item_id"].to_list()
+                print(recs)
+                self._stats["request_personal_count"] += 1
+            else:
+                recs = self._recs["default"]
+                log.info(f'Recommendations for user {user_id} not found, returning default')
+                recs = recs.sample(k)["track_id"].to_list()
+                self._stats["request_default_count"] += 1
         except Exception as e:
             print(f'{type(e)}: {e}')
             log.error("No recommendations found")
