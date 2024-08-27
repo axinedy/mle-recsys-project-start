@@ -3,9 +3,7 @@ import logging
 from urllib.request import Request
 from fastapi import FastAPI
 from starlette.responses import JSONResponse
-from events_store import EventStore
-from recommendations import Recommendations
-from similar_items import SimilarItems
+from history_store import EventStore, Recommendations, SimilarItems
 
 
 rec_columns = ["user_id", "item_id", "score", "tracks_total", "hearing_days", "tracks_per_day", "nusers", "rank"]
