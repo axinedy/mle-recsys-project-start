@@ -6,9 +6,9 @@ from starlette.responses import JSONResponse
 from history_store import EventStore, Recommendations, SimilarItems
 
 
-rec_columns = ["user_id", "item_id", "score", "tracks_total", "hearing_days", "tracks_per_day", "nusers", "rank"]
-def_columms = ["track_id", "users", ]
-sim_columns = ["score", "track_id_1", "track_id_2"]
+REC_COLUMNS = ["user_id", "item_id", "score", "tracks_total", "hearing_days", "tracks_per_day", "nusers", "rank"]
+DEF_COLUMMS = ["track_id", "users", ]
+SIM_COLUMNS = ["score", "track_id_1", "track_id_2"]
 
 MAX_K = 100
 log = logging.getLogger("uvicorn.error")
@@ -17,18 +17,18 @@ rec_store = Recommendations()
 rec_store.load(
     "personal",
     'recommendations.parquet',
-    columns=rec_columns,
+    columns=REC_COLUMNS,
 )
 rec_store.load(
     "default",
     'top_popular.parquet',
-    columns=def_columms,
+    columns=DEF_COLUMMS,
 )
 
 sim_store = SimilarItems()
 sim_store.load(
     "similar.parquet",
-    columns=sim_columns
+    columns=SIM_COLUMNS
 )
 
 events_store = EventStore()
@@ -51,19 +51,19 @@ async def range_error_exception_handler(request: Request, exc: RangeError):
 def get_sims(user_id: int, max_events: int) -> list[int]:
     hist = events_store.get(user_id, max_events)
     log.info(f'History: {hist}')
-    similars = [sim_store.get(h, max_events) for h in hist]
+    all_similar_items = [sim_store.get(h, max_events) for h in hist]
     # print('all sims', sims)
     non_empty_count = 0
-    rs = []
-    for si in similars:
-        if len(si):
-            rs.append(si)
+    non_empty_similars = []
+    for similar_items_for_specific_track in all_similar_items:
+        if len(similar_items_for_specific_track):
+            non_empty_similars.append(similar_items_for_specific_track)
             non_empty_count += 1
-    similars = []
+    all_similar_items = []
     max_sim = max(max_events // max(non_empty_count, 1), 1)
-    for si in rs:
-        similars += random.sample(si, max_sim)
-    return similars
+    for similar_items_for_specific_track in non_empty_similars:
+        all_similar_items += random.sample(similar_items_for_specific_track, max_sim)
+    return all_similar_items
 
 
 @app.get(

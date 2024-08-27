@@ -35,6 +35,8 @@ def get_recs(user_id: int, k: int):
         service_url + "/recommendations", headers=headers, params={'user_id': user_id, "k": k})
     if resp.status_code != 200:
         print(f"status code: {resp.status_code}")
+        print(resp.json())
+        sys.exit(3)
     print(resp.json())
 
 
@@ -43,6 +45,8 @@ def post_event(user_id: int, item_id: int):
         service_url + "/store_event", headers=headers, params={'user_id': user_id, "item_id": item_id})
     if resp.status_code not in [200, 201]:
         print(f"status code: {resp.status_code}")
+        print(resp.json())
+        sys.exit(4)
     print(resp.json())
 
 
